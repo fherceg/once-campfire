@@ -200,12 +200,10 @@ export default class extends Controller {
   }
 
   #pendingUploadProgress(filename, percent=0) {
-    return `
-      <div class="message__pending-upload flex align-center gap" style="--percentage: ${percent}%">
-        <div class="composer__file-thumbnail composer__file-thumbnail--common colorize--black borderless flex-item-no-shrink"></div>
-        <div>${escapeHTML(filename)} - <span>${percent}%</span></div>
-      </div>
-    `
+    return '<div class="message__pending-upload flex align-center gap" style="--percentage: ' + percent + '%">' +
+      '<div class="composer__file-thumbnail composer__file-thumbnail--common colorize--black borderless flex-item-no-shrink"></div>' +
+      '<div>' + escapeHTML(filename) + ' - <span>' + percent + '%</span></div>' +
+      '</div>'
   }
 async #compressImage(file) {
     const MAX_SIZE = 0.5 * 1024 * 1024 // 0.5MB
