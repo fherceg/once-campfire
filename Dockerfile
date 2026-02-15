@@ -1,3 +1,4 @@
+# Force rebuild
 # syntax = docker/dockerfile:1
 
 # Make sure it matches the Ruby version in .ruby-version and Gemfile
