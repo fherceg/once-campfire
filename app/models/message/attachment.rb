@@ -8,6 +8,7 @@ module Message::Attachment
     has_one_attached :attachment do |attachable|
       attachable.variant :thumb, resize_to_limit: [ THUMBNAIL_MAX_WIDTH, THUMBNAIL_MAX_HEIGHT ]
     end
+   validate :attachment_is_not_allowed
   end
 
   module ClassMethods
@@ -29,7 +30,13 @@ module Message::Attachment
     def ensure_attachment_analyzed
       attachment&.analyze
     end
-
+private
+    def attachment_is_not_allowed
+  if attachment.attached? && !attachment.blob.content_type.start_with?("image/")
+    errors.add(:attachment, "Only image files are allowed")
+    attachment.purge
+  end
+end
     def process_attachment_thumbnail
       case
       when attachment.video?
