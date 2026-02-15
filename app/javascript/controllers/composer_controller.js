@@ -65,6 +65,11 @@ export default class extends Controller {
 
   filePicked(event) {
     for (const file of event.target.files) {
+     if (!file.type.startsWith("image/")) {
+  alert("Only image files are allowed. Videos and documents are not permitted.")
+        event.target.value = null
+        return
+      }
       this.#files.push(file)
     }
     event.target.value = null
@@ -76,12 +81,16 @@ export default class extends Controller {
     this.#updateFileList()
   }
 
-  pasteFiles(event) {
+ pasteFiles(event) {
     if (event.clipboardData.files.length > 0) {
       event.preventDefault()
     }
 
     for (const file of event.clipboardData.files) {
+      if (!file.type.startsWith("image/")) {
+  alert("Only image files are allowed. Videos and documents are not permitted.")
+        return
+      }
       this.#files.push(file)
     }
 
@@ -90,6 +99,10 @@ export default class extends Controller {
 
   dropFiles({ detail: { files } }) {
     for (const file of files) {
+      if (!file.type.startsWith("image/")) {
+  alert("Only image files are allowed. Videos and documents are not permitted.")
+        return
+      }
       this.#files.push(file)
     }
 
@@ -135,7 +148,10 @@ export default class extends Controller {
     this.#files = []
     this.#updateFileList()
 
-    for (const file of files) {
+    for (let file of files) {
+      if (file.type.startsWith("image/")) {
+        file = await this.#compressImage(file)
+      }
       const clientMessageId = this.#generateClientId()
       const uploader = new FileUploader(file, this.element.action, clientMessageId, this.#uploadProgress.bind(this))
 
@@ -191,4 +207,43 @@ export default class extends Controller {
       </div>
     `
   }
+async #compressImage(file) {
+    const MAX_SIZE = 0.5 * 1024 * 1024 // 0.5MB
+    if (file.size <= MAX_SIZE) return file
+
+    return new Promise((resolve) => {
+      const img = new Image()
+      const url = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        const canvas = document.createElement("canvas")
+        let width = img.width
+        let height = img.height
+        const scale = Math.sqrt(MAX_SIZE / file.size)
+        width = Math.floor(width * scale)
+        height = Math.floor(height * scale)
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext("2d")
+        ctx.drawImage(img, 0, 0, width, height)
+        canvas.toBlob((blob) => {
+          resolve(new File([blob], file.name, { type: "image/jpeg" }))
+        }, "image/jpeg", 0.85)
+      }
+      img.src = url
+    })
+  }
+```
+
+Commit the changes.
+
+---
+
+## File 2: `app/models/message/attachment.rb`
+
+This adds a **server-side** safety check (important - never rely on JS alone!).
+
+Go to:
+```
+https://github.com/fherceg/once-campfire/blob/main/app/models/message/attachment.rb
 }
