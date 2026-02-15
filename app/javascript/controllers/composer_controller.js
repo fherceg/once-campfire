@@ -65,8 +65,8 @@ export default class extends Controller {
 
   filePicked(event) {
     for (const file of event.target.files) {
-     if (!file.type.startsWith("image/")) {
-  alert("Only image files are allowed. Videos and documents are not permitted.")
+      if (!file.type.startsWith("image/")) {
+        alert("Only image files are allowed. Videos and documents are not permitted.")
         event.target.value = null
         return
       }
@@ -81,14 +81,14 @@ export default class extends Controller {
     this.#updateFileList()
   }
 
- pasteFiles(event) {
+  pasteFiles(event) {
     if (event.clipboardData.files.length > 0) {
       event.preventDefault()
     }
 
     for (const file of event.clipboardData.files) {
       if (!file.type.startsWith("image/")) {
-  alert("Only image files are allowed. Videos and documents are not permitted.")
+        alert("Only image files are allowed. Videos and documents are not permitted.")
         return
       }
       this.#files.push(file)
@@ -100,7 +100,7 @@ export default class extends Controller {
   dropFiles({ detail: { files } }) {
     for (const file of files) {
       if (!file.type.startsWith("image/")) {
-  alert("Only image files are allowed. Videos and documents are not permitted.")
+        alert("Only image files are allowed. Videos and documents are not permitted.")
         return
       }
       this.#files.push(file)
@@ -185,14 +185,20 @@ export default class extends Controller {
       const extension = file.name.split(".").pop()
 
       const node = document.createElement("button")
-      node.setAttribute("type","button")
-      node.setAttribute("style","gap: 0")
+      node.setAttribute("type", "button")
+      node.setAttribute("style", "gap: 0")
       node.dataset.action = "composer#fileUnpicked"
       node.dataset.composerIndexParam = index
       node.className = "btn btn--plain composer__file txt-normal position-relative unpad flex-column"
-      node.innerHTML = file.type.match(/^image\/.*/) ? '<img role="presentation" class="flex-item-no-shrink composer__file-thumbnail" src="' + URL.createObjectURL(file) + '">' : '<span class="composer__file-thumbnail composer__file-thumbnail--common colorize--black"></span>'
-node.innerHTML += '<span class="pad-inline txt-small flex align-center max-width composer__file-caption"><span class="overflow-ellipsis">' + escapeHTML(filename) + '.</span><span class="flex-item-no-shrink">' + escapeHTML(extension) + '</span></span>'
-      
+
+      if (file.type.match(/^image\/.*/)) {
+        node.innerHTML = '<img role="presentation" class="flex-item-no-shrink composer__file-thumbnail" src="' + URL.createObjectURL(file) + '">'
+      } else {
+        node.innerHTML = '<span class="composer__file-thumbnail composer__file-thumbnail--common colorize--black"></span>'
+      }
+
+      node.innerHTML += '<span class="pad-inline txt-small flex align-center max-width composer__file-caption"><span class="overflow-ellipsis">' + escapeHTML(filename) + '.</span><span class="flex-item-no-shrink">' + escapeHTML(extension) + '</span></span>'
+
       return node
     })
 
@@ -205,14 +211,15 @@ node.innerHTML += '<span class="pad-inline txt-small flex align-center max-width
       '<div>' + escapeHTML(filename) + ' - <span>' + percent + '%</span></div>' +
       '</div>'
   }
-async #compressImage(file) {
-    const MAX_SIZE = 0.5 * 1024 * 1024 // 0.5MB
+
+  async #compressImage(file) {
+    const MAX_SIZE = 0.5 * 1024 * 1024
     if (file.size <= MAX_SIZE) return file
 
     return new Promise((resolve) => {
       const img = new Image()
       const url = URL.createObjectURL(file)
-      img.onload = () => {
+      img.onload = function() {
         URL.revokeObjectURL(url)
         const canvas = document.createElement("canvas")
         let width = img.width
@@ -224,24 +231,11 @@ async #compressImage(file) {
         canvas.height = height
         const ctx = canvas.getContext("2d")
         ctx.drawImage(img, 0, 0, width, height)
-        canvas.toBlob((blob) => {
+        canvas.toBlob(function(blob) {
           resolve(new File([blob], file.name, { type: "image/jpeg" }))
         }, "image/jpeg", 0.85)
       }
       img.src = url
     })
   }
-```
-
-Commit the changes.
-
----
-
-## File 2: `app/models/message/attachment.rb`
-
-This adds a **server-side** safety check (important - never rely on JS alone!).
-
-Go to:
-```
-https://github.com/fherceg/once-campfire/blob/main/app/models/message/attachment.rb
 }
