@@ -190,9 +190,9 @@ export default class extends Controller {
       node.dataset.action = "composer#fileUnpicked"
       node.dataset.composerIndexParam = index
       node.className = "btn btn--plain composer__file txt-normal position-relative unpad flex-column"
-      node.innerHTML = file.type.match(/^image\/.*/) ? `<img role="presentation" class="flex-item-no-shrink composer__file-thumbnail" src="${URL.createObjectURL(file)}">` : `<span class="composer__file-thumbnail composer__file-thumbnail--common colorize--black"></span>`
-      node.innerHTML += `<span class="pad-inline txt-small flex align-center max-width composer__file-caption"><span class="overflow-ellipsis">${escapeHTML(filename)}.</span><span class="flex-item-no-shrink">${escapeHTML(extension)}</span></span>`
-
+      node.innerHTML = file.type.match(/^image\/.*/) ? '<img role="presentation" class="flex-item-no-shrink composer__file-thumbnail" src="' + URL.createObjectURL(file) + '">' : '<span class="composer__file-thumbnail composer__file-thumbnail--common colorize--black"></span>'
+node.innerHTML += '<span class="pad-inline txt-small flex align-center max-width composer__file-caption"><span class="overflow-ellipsis">' + escapeHTML(filename) + '.</span><span class="flex-item-no-shrink">' + escapeHTML(extension) + '</span></span>'
+      
       return node
     })
 
