@@ -36,7 +36,7 @@ RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git
 
 # Copy application code
-ARG CACHE_BUST=6
+ARG CACHE_BUST=7
 COPY . .
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
